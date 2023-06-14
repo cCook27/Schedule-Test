@@ -10,20 +10,26 @@ const port = 3001;
 app.use(cors());
 app.use(bodyParser.json());
 
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
 // Routes
 app.get('/api/data', (req, res) => {
   let distanceInfo = null;
+  const origin = req.query.origin;
+  const destination = req.query.destination;
 
   if(!distanceInfo) {
-    axios.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins=Washington%2C%20DC&destinations=New%20York%20City%2C%20NY&units=imperial&key=AIzaSyAWH9MKNEKtg2LMmFtGyj9xxkrPH5pdOxQ')
+    axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&units=imperial&key=AIzaSyAWH9MKNEKtg2LMmFtGyj9xxkrPH5pdOxQ`)
     .then(response => {
       distanceInfo = response.data;
       if(distanceInfo) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify(distanceInfo));
+        return res.json(distanceInfo);
+
       } else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({error: 'Data not found'}));
+        return res.status(404).json({ error: 'Data not found' });
       }
    })
     .catch(error => {
@@ -34,7 +40,4 @@ app.get('/api/data', (req, res) => {
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+
